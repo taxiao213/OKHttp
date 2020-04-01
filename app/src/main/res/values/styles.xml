@@ -1,11 +1,36 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+
         <item name="colorAccent">@color/colorAccent</item>
+        <!--没有标题栏-->
+        <item name="android:windowNoTitle">true</item>
+        <!--窗口界面颜色-->
+        <item name="android:windowBackground">@color/cdBgColor</item>
+        <!--标题栏背景颜色-->
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
     </style>
 
+    <!--分割线-->
+    <style name="SplitLine">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/cdBgColor</item>
+    </style>
+
+    <style name="login_confirm_edittext">
+        <item name="android:inputType">number|text</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/grey_33</item>
+        <item name="android:textSize">19sp</item>
+        <item name="android:maxLength">1</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:background">@null</item>
+    </style>
 </resources>

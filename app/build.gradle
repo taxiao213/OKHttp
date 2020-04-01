@@ -22,4 +22,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     support.each {k,v -> api v}
     implementation "com.squareup.okhttp3:okhttp:$okhttp3Version"
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit2Version"
+    implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofit2Version"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.retrofit2Version"
 }
