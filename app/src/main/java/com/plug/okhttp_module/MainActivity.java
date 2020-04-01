@@ -2,8 +2,13 @@ package com.plug.okhttp_module;
 
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -39,6 +44,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         request();
+
+
+        // 有序广播
+        Intent intent = new Intent();
+        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+            }
+        };
+        sendOrderedBroadcast(intent, null, broadcastReceiver, null, Activity.RESULT_OK, "", new Bundle());
     }
 
     public void request() {
@@ -88,6 +104,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"my_power");
+        powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "my_power");
     }
 }
