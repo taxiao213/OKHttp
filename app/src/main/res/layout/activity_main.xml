@@ -54,5 +54,12 @@
         android:gravity="center"
         android:text="测试" />
 
+    <TextView
+        android:id="@+id/animation"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:text="动画" />
+
 
 </LinearLayout>

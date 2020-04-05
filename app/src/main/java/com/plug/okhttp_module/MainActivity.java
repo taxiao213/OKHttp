@@ -1,18 +1,27 @@
 package com.plug.okhttp_module;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
+import android.widget.ViewAnimator;
 
 
 import com.plug.okhttp_module.retrofit.HttpRequest;
@@ -32,11 +41,20 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private String TAG = this.getClass().getSimpleName();
+    private Handler handler;
+    private View viewAnimation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        viewAnimation = findViewById(R.id.animation);
+        viewAnimation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                initAnimation();
+            }
+        });
         findViewById(R.id.test).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -44,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         request();
-
 
         // 有序广播
         Intent intent = new Intent();
@@ -55,6 +72,126 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         sendOrderedBroadcast(intent, null, broadcastReceiver, null, Activity.RESULT_OK, "", new Bundle());
+
+        // 生成日志记录 app.trace 拖到Android studio分析
+//        File file = new File(Environment.getExternalStorageDirectory() + File.separator + "app.trace");
+////        Debug.startMethodTracing(file.getAbsolutePath());
+////        init();
+////        testB();
+////        Debug.stopMethodTracing();
+
+
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                while (true) {
+                    System.out.println("run...");
+                }
+            }
+        };
+        thread.start();
+
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                // 子线程开启handler
+                Looper.prepare();
+                handler = new Handler() {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        super.handleMessage(msg);
+                        Toast.makeText(MainActivity.this, "handler", Toast.LENGTH_SHORT).show();
+                    }
+                };
+                Looper.loop();
+            }
+        }.start();
+
+        // 获取可用的堆内存
+        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        int memoryClass = activityManager.getMemoryClass();
+        Log.e("TAG", String.valueOf(memoryClass));
+
+    }
+
+    /**
+     * 属性动画
+     * alpha	透明度	float
+     * translationX	X方向的位移	float
+     * translationY	Y方向的位移	float
+     * scaleX	X方向的缩放倍数	float
+     * scaleY	Y方向的缩放倍数	float
+     * rotation	以屏幕方向为轴的旋转度数	float
+     * rotationX	以X轴为轴的旋转度数	float
+     * rotationY	以Y轴为轴的旋转度数	float
+     */
+    private void initAnimation() {
+        ObjectAnimator translationX = ObjectAnimator.ofFloat(viewAnimation, "translationX", 10, 100);
+        translationX.setDuration(300);
+        ObjectAnimator alpha = ObjectAnimator.ofFloat(viewAnimation, "alpha", 100, 50);
+        alpha.setDuration(300);
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(viewAnimation, "scaleX", 1, 5);
+        scaleX.setDuration(500);
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(viewAnimation, "scaleY", 1, 5);
+        scaleY.setDuration(500);
+        // 动画集合
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(translationX);
+        animatorSet.playTogether(alpha);
+        animatorSet.playTogether(scaleX);
+        animatorSet.playTogether(scaleY);
+        animatorSet.start();
+
+
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(10, 100);
+        valueAnimator.setDuration(500);
+        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float animatedValue = (float) animation.getAnimatedValue();
+                Log.e(TAG, String.valueOf(animatedValue));
+            }
+        });
+        valueAnimator.start();
+
+        // 载入XML动画
+        ValueAnimator animator = (ValueAnimator) AnimatorInflater.loadAnimator(this, R.animator.set_animation);
+        animator.setTarget(viewAnimation);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float animatedValue = (float) animation.getAnimatedValue();
+                Log.e(TAG, String.valueOf(animatedValue));
+            }
+        });
+        animator.start();
+    }
+
+    private void testB() {
+        try {
+            Thread.sleep(6000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void init() {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        testA();
+    }
+
+    private void testA() {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void request() {

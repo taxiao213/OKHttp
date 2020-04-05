@@ -36,7 +36,51 @@ public class Test2 {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        thread.start();
+//        thread.start();
+
+        int[] sorted = bubbleSort(new int[]{5, 2, 0, 1, 5});
+        for (int i : sorted) {
+            System.out.print(i + "\r\n");
+        }
     }
 
+    /**
+     * 冒泡排序
+     */
+    public static int[] bubbleSort(int[] arr) {
+        // 外层循环控制比较轮数
+        for (int i = 0; i < arr.length; i++) {
+            // 内层循环控制每轮比较次数
+            for (int j = 0; j < arr.length - i - 1; j++) {
+                // 按照从小到大排列
+                if (arr[j] > arr[j + 1]) {
+                    int temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
+            }
+        }
+        return arr;
+    }
+
+    /**
+     * 比较相邻的元素。如果第一个比第二个大，就交换他们两个。
+     * <p>
+     * 对每一对相邻元素作同样的工作，从开始第一对到结尾的最后一对。在这一点，最后的元素应该会是最大的数。
+     * <p>
+     * 针对所有的元素重复以上的步骤，除了最后一个。
+     *
+     * @param arr
+     */
+    public void sort(int[] arr) {
+        for (int i = 0; i < arr.length; i++) {
+            for (int j = 0; j < arr.length - 1 - i; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    int temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
+            }
+        }
+    }
 }
