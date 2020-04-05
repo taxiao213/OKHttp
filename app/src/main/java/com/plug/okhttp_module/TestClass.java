@@ -27,7 +27,7 @@ public class TestClass {
     }
 
     /**
-     * GET / HTTP/1.1
+     * GET / HTTPS/1.1
      * Host: www.baidu.com
      */
     public static void socketHttpsGet() {
