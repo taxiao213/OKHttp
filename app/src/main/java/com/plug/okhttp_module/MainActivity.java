@@ -9,24 +9,43 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Instrumentation;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.hardware.input.InputManager;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.RemoteController;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Printer;
+import android.view.InputEvent;
+import android.view.KeyEvent;
 import android.view.View;
+import android.widget.MediaController;
 import android.widget.Toast;
+import android.widget.VideoView;
 import android.widget.ViewAnimator;
 
 
 import com.plug.okhttp_module.retrofit.HttpRequest;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import okhttp3.Call;
@@ -53,14 +72,53 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 initAnimation();
+
+                Handler handler = new Handler();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this, "哈哈", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
         findViewById(R.id.test).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new DialogLoginConfirm(MainActivity.this, "1111");
+
             }
         });
+
+        findViewById(R.id.stop_music).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    // 通过模拟耳机按键去控制第三方音乐播放器暂停 播放
+                    // 1.input指令去调用
+                    // 下一首
+//                    String keyCommand = "input keyevent " + KeyEvent.KEYCODE_MEDIA_NEXT;
+                    // 上一首
+//                    String keyCommand = "input keyevent " + KeyEvent.KEYCODE_MEDIA_PREVIOUS;
+                    // Key code constant: Play/Pause media key
+//                    String keyCommand = "input keyevent " + KeyEvent.KEYCODE_MEDIA_PLAY;
+                    // 暂停播放
+//                    String keyCommand = "input keyevent " + KeyEvent.KEYCODE_MEDIA_PAUSE;
+                    // 开始播放
+                    String keyCommand = "input keyevent " + KeyEvent.KEYCODE_MEDIA_PLAY;
+                    Runtime runtime = Runtime.getRuntime();
+                    Process proc = runtime.exec(keyCommand);
+
+                    // 2.通过反射调用
+                    injectInputEvent();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+//        videoPlay();
+
         request();
 
         // 有序广播
@@ -72,25 +130,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         sendOrderedBroadcast(intent, null, broadcastReceiver, null, Activity.RESULT_OK, "", new Bundle());
-
-        // 生成日志记录 app.trace 拖到Android studio分析
-//        File file = new File(Environment.getExternalStorageDirectory() + File.separator + "app.trace");
-////        Debug.startMethodTracing(file.getAbsolutePath());
-////        init();
-////        testB();
-////        Debug.stopMethodTracing();
-
-
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                while (true) {
-                    System.out.println("run...");
-                }
-            }
-        };
-        thread.start();
+        createDebugTracing();
 
         new Thread() {
             @Override
@@ -114,6 +154,107 @@ public class MainActivity extends AppCompatActivity {
         int memoryClass = activityManager.getMemoryClass();
         Log.e("TAG", String.valueOf(memoryClass));
 
+        initBroadCast();
+    }
+
+    /**
+     * 生成日志记录 app.trace 拖到Android studio分析
+     */
+    private void createDebugTracing() {
+//        File file = new File(Environment.getExternalStorageDirectory() + File.separator + "app.trace");
+//        Debug.startMethodTracing(file.getAbsolutePath());
+//        init();
+//        testB();
+//        Debug.stopMethodTracing();
+    }
+
+    /**
+     * 初始化广播，监听物理按键事件
+     */
+    private void initBroadCast() {
+        IntentFilter mediafilter = new IntentFilter();
+        //拦截按键KeyEvent.KEYCODE_MEDIA_NEXT、KeyEvent.KEYCODE_MEDIA_PREVIOUS、KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
+        mediafilter.addAction(Intent.ACTION_MEDIA_BUTTON);
+        mediafilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        mediafilter.addAction("android.intent.action.HEADSET_PLUG");
+        mediafilter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
+        mediafilter.setPriority(1000);//设置优先级，优先级太低可能被拦截，收不到信息。一般默认优先级为0，通话优先级为1，该优先级的值域是-1000到1000。
+        MediaButtonReceiver mediaButtonReceiver = new MediaButtonReceiver();
+        registerReceiver(mediaButtonReceiver, mediafilter);
+        registerHeadsetReceiver();
+        try {
+            String keyCommand = "input keyevent " + KeyEvent.KEYCODE_MEDIA_PAUSE;
+            Runtime runtime = Runtime.getRuntime();
+            Process proc = runtime.exec(keyCommand);
+        } catch (Exception e) {
+        }
+    }
+
+
+    //注册 注销
+    public void registerHeadsetReceiver() {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        ComponentName name = new ComponentName(getPackageName(), MediaButtonReceiver.class.getName());
+        audioManager.registerMediaButtonEventReceiver(name);
+    }
+
+    public void unregisterHeadsetReceiver() {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        ComponentName name = new ComponentName(getPackageName(), MediaButtonReceiver.class.getName());
+        audioManager.unregisterMediaButtonEventReceiver(name);
+    }
+
+    /**
+     * 播放视频
+     */
+    private void videoPlay() {
+        VideoView video = findViewById(R.id.video);
+
+        File file = new File(Environment.getExternalStorageDirectory() + "/DCIM/ScreenRecorder/Screenrecorder-2020-04-11-14-24-54-511.mp4");
+        video.setVideoPath(file.getAbsolutePath());
+        //控制视频播放
+        MediaController mc = new MediaController(MainActivity.this);
+        video.setMediaController(mc);//让VideoView与MediaControl关联
+        video.requestFocus();//让VideoView获取焦点
+        video.start();
+        video.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                Toast.makeText(MainActivity.this, "视频播放完毕", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    boolean SWITCH = false;
+
+    /**
+     * 通过反射调用第三方音乐播放器 播放 停止
+     */
+    private void injectInputEvent() {
+        long now = SystemClock.uptimeMillis();
+        KeyEvent play = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY, 0);
+        KeyEvent pause = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE, 0);
+//        InputManager.getInstance().injectInputEvent(up, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+        try {
+            Class<?> aClass = Class.forName("android.hardware.input.InputManager");
+            Method getInstance = aClass.getDeclaredMethod("getInstance");
+            Object invoke = getInstance.invoke(aClass);
+
+//            Field inject_input_event_mode_async = aClass.getDeclaredField("INJECT_INPUT_EVENT_MODE_ASYNC");
+//            inject_input_event_mode_async.setAccessible(true);
+//            Object ASYNC = inject_input_event_mode_async.getInt(aClass);
+            Object ASYNC = 0;
+            Method injectInputEvent = aClass.getDeclaredMethod("injectInputEvent", InputEvent.class, int.class);
+            if (SWITCH) {
+                injectInputEvent.invoke(invoke, play, ASYNC);
+            } else {
+                injectInputEvent.invoke(invoke, pause, ASYNC);
+            }
+            SWITCH = !SWITCH;
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
+        }
     }
 
     /**
@@ -242,5 +383,12 @@ public class MainActivity extends AppCompatActivity {
 
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "my_power");
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterHeadsetReceiver();
     }
 }
