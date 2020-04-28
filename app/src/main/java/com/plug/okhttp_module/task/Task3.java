@@ -16,4 +16,8 @@ public class Task3 extends BaseTask {
     public void doAction() {
         System.out.println("Task3");
     }
+
+    public void test(String st, int a, boolean is) {
+        System.out.println(":st == " + st + " a == " + a + " boolean == " + is);
+    }
 }

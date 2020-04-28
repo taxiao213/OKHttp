@@ -22,13 +22,20 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".MainActivity">
+        <activity
+            android:launchMode="singleTop"
+            android:name=".MainActivity"
+            android:label="mainactivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:launchMode="singleInstance"
+            android:label="TestActivity"
+            android:name=".TestActivity" />
 
         <receiver android:name="com.plug.okhttp_module.MediaButtonReceiver">
             <intent-filter android:priority="1000">

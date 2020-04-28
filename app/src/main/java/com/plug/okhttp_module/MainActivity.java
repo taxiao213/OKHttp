@@ -16,6 +16,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapRegionDecoder;
 import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -23,6 +24,7 @@ import android.media.RemoteController;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
@@ -43,9 +45,15 @@ import android.widget.ViewAnimator;
 import com.plug.okhttp_module.retrofit.HttpRequest;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.Proxy;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 
 import okhttp3.Call;
@@ -155,6 +163,16 @@ public class MainActivity extends AppCompatActivity {
         Log.e("TAG", String.valueOf(memoryClass));
 
         initBroadCast();
+
+        View jump = findViewById(R.id.jump);
+        jump.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, TestActivity.class));
+            }
+        });
+        HandlerThread handlerThread = new HandlerThread("Thread");
+        handlerThread.start();
     }
 
     /**
@@ -336,7 +354,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void request() {
-        OkHttpClient okHttpClient = new OkHttpClient();
+        try {
+            new URL("").openConnection(Proxy.NO_PROXY);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        OkHttpClient okHttpClient = new OkHttpClient().newBuilder().proxy(Proxy.NO_PROXY).build();
         Request request = new Request.Builder()
                 .get()
                 .url("https://www.baidu.com")
