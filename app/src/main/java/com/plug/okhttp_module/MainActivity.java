@@ -9,6 +9,7 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.Instrumentation;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
@@ -16,6 +17,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.BitmapRegionDecoder;
 import android.hardware.input.InputManager;
 import android.media.AudioManager;
@@ -27,15 +29,20 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.MessageQueue;
+import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Printer;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -49,13 +56,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.CacheControl;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -146,6 +156,7 @@ public class MainActivity extends AppCompatActivity {
                 super.run();
                 // 子线程开启handler
                 Looper.prepare();
+                Log.e(TAG, " currentThread " + Thread.currentThread().getName());
                 handler = new Handler() {
                     @Override
                     public void handleMessage(Message msg) {
@@ -173,6 +184,42 @@ public class MainActivity extends AppCompatActivity {
         });
         HandlerThread handlerThread = new HandlerThread("Thread");
         handlerThread.start();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.e(TAG, "onNewIntent");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.e(TAG, "onStart");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e(TAG, "onResume");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e(TAG, "onPause");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.e(TAG, "onStop");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.e(TAG, "onRestart");
     }
 
     /**
@@ -287,6 +334,7 @@ public class MainActivity extends AppCompatActivity {
      * rotationY	以Y轴为轴的旋转度数	float
      */
     private void initAnimation() {
+        // 属性动画
         ObjectAnimator translationX = ObjectAnimator.ofFloat(viewAnimation, "translationX", 10, 100);
         translationX.setDuration(300);
         ObjectAnimator alpha = ObjectAnimator.ofFloat(viewAnimation, "alpha", 100, 50);
@@ -326,6 +374,47 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         animator.start();
+
+        // 补间动画
+        ScaleAnimation scaleAnimation = new ScaleAnimation(0, 1f, 0f, 1f, viewAnimation.getPivotX(), viewAnimation.getPivotY());
+        scaleAnimation.setDuration(500);
+        scaleAnimation.setFillAfter(true);
+        scaleAnimation.setRepeatMode(Animation.REVERSE);// 设置旋转模式
+        scaleAnimation.setRepeatCount(10);// 设置重复次数
+        viewAnimation.startAnimation(scaleAnimation);
+
+        // SharedPreferences 存储值
+        SharedPreferences sp_name = getSharedPreferences("sp_name", MODE_PRIVATE);
+        SharedPreferences.Editor edit = sp_name.edit();
+        // 存入键值
+        edit.putString("name", "1234");
+        edit.apply();
+        // 清除所有数据
+        edit.clear();
+        // 获取值
+        sp_name.getString("name", "0");
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        java.lang.reflect.Proxy.newProxyInstance(getClassLoader(), getClass().getInterfaces(), new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+                return null;
+            }
+        });
+
+        //getMainLooper().myQueue()或者Looper.myQueue()Looper.myQueue().addIdleHandler(new IdleHandler() {
+
+        Looper.myQueue().addIdleHandler(new MessageQueue.IdleHandler() {
+            @Override
+            public boolean queueIdle() {
+                //你要处理的事情
+                return false;
+            }
+        });
+
+
     }
 
     private void testB() {
@@ -361,9 +450,20 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        CacheControl cacheControl = new CacheControl.Builder()
+                .noCache()// 不使用缓存，全部走网络
+                .noStore()// 不使用缓存，也不存储缓存
+                .onlyIfCached()// 只使用缓存
+                .noTransform()// 禁止转码
+                .maxAge(10, TimeUnit.SECONDS)// 设置缓存的响应的最长期限
+                .maxStale(10, TimeUnit.SECONDS)// 客户端可以接收超出超时期间的响应消息
+                .minFresh(10, TimeUnit.SECONDS)// 设置响应将持续刷新的最小秒数
+                .build();
 
         OkHttpClient okHttpClient = new OkHttpClient().newBuilder().proxy(Proxy.NO_PROXY).build();
         Request request = new Request.Builder()
+                // 设置缓存
+                .cacheControl(cacheControl)
                 .get()
                 .url("https://www.baidu.com")
                 .build();

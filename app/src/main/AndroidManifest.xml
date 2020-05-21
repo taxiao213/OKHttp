@@ -23,9 +23,9 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:launchMode="singleTop"
             android:name=".MainActivity"
-            android:label="mainactivity">
+            android:label="mainactivity"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,9 +33,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:launchMode="singleInstance"
+            android:name=".TestActivity"
             android:label="TestActivity"
-            android:name=".TestActivity" />
+            android:launchMode="singleInstance" />
 
         <receiver android:name="com.plug.okhttp_module.MediaButtonReceiver">
             <intent-filter android:priority="1000">
