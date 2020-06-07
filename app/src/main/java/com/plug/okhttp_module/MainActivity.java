@@ -35,7 +35,9 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.Printer;
 import android.view.InputEvent;
@@ -85,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.e(TAG, "onCreate");
         viewAnimation = findViewById(R.id.animation);
         viewAnimation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,7 +107,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 new DialogLoginConfirm(MainActivity.this, "1111");
-
+            }
+        });
+        findViewById(R.id.ry).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, RecyclerViewActivity.class));
             }
         });
 
@@ -184,6 +192,12 @@ public class MainActivity extends AppCompatActivity {
         });
         HandlerThread handlerThread = new HandlerThread("Thread");
         handlerThread.start();
+
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fl, new TestFragment());
+        fragmentTransaction.commitNowAllowingStateLoss();
+
+
     }
 
     @Override
@@ -515,6 +529,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.e(TAG, "onDestroy");
         unregisterHeadsetReceiver();
     }
 }

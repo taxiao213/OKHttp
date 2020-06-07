@@ -50,7 +50,8 @@ ext {
 
     dependencies = [
             "appcompat"       : "com.android.support:appcompat-v7:${supportLibraryVersion}",
-            "constraintLayout": "com.android.support.constraint:constraint-layout:${constraintLayoutVersion}"
+            "constraintLayout": "com.android.support.constraint:constraint-layout:${constraintLayoutVersion}",
+            "recyclerview"    : "com.android.support:recyclerview-v7:${supportLibraryVersion}"
     ]
 
     // 包名，用于存放APT生成的类文件
