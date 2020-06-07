@@ -115,7 +115,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
             // 获取四级缓存RecyclerPool
             Field mRecyclerPool = recyclerClass.getDeclaredField("mRecyclerPool");
             mRecyclerPool.setAccessible(true);
-            Object recyclerPoolObject =  mRecyclerPool.get(recyclerObject);
+            Object recyclerPoolObject = mRecyclerPool.get(recyclerObject);
             Class<?> recyclerPoolClass = Class.forName(recyclerPoolObject.getClass().getName());
             Field mScrap = recyclerPoolClass.getDeclaredField("mScrap");
             mScrap.setAccessible(true);
@@ -123,7 +123,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
             int recyclerPoolSize = scrap.size();
 
             tv_ry_size.setText("mAttachedScrap size == " + attachedSize +
-                    "\r\n" + "mCachedViews size == " + cachedViewsSize+
+                    "\r\n" + "mCachedViews size == " + cachedViewsSize +
                     "\r\n" + "mRecyclerPool size == " + recyclerPoolSize);
 
         } catch (Exception e) {
