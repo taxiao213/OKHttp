@@ -86,6 +86,7 @@ public class RecyclerViewActivity extends AppCompatActivity {
             list.add(String.valueOf(i));
         }
         myAdapter.notifyDataSetChanged();
+        recyclerInfo();
     }
 
     /**
