@@ -1,10 +1,13 @@
 package com.plug.okhttp_module;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -51,7 +54,23 @@ public class TestActivity extends AppCompatActivity {
 
             }
         });
+        String[] permiss = new String[0];
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(permiss,1);
+            checkPermission(permiss[0],0,0);
+        }
+    }
 
+    // 处理结果回调
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    // 是否需要显示UI界面提示用户为什么需要这个权限
+    @Override
+    public boolean shouldShowRequestPermissionRationale(@NonNull String permission) {
+        return super.shouldShowRequestPermissionRationale(permission);
     }
 
     @Override

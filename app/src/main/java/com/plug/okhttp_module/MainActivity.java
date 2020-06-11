@@ -357,6 +357,7 @@ public class MainActivity extends AppCompatActivity {
         scaleX.setDuration(500);
         ObjectAnimator scaleY = ObjectAnimator.ofFloat(viewAnimation, "scaleY", 1, 5);
         scaleY.setDuration(500);
+        scaleY.start();
         // 动画集合
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(translationX);
