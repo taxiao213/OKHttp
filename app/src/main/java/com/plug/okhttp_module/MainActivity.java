@@ -115,6 +115,12 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, RecyclerViewActivity.class));
             }
         });
+        findViewById(R.id.sv).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, SurfaceViewActivity.class));
+            }
+        });
 
         findViewById(R.id.stop_music).setOnClickListener(new View.OnClickListener() {
             @Override

@@ -82,6 +82,13 @@
         android:gravity="center"
         android:text="跳转recyclerview" />
 
+    <TextView
+        android:id="@+id/sv"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:text="跳转surfaceview" />
+
     <VideoView
         android:id="@+id/video"
         android:layout_width="match_parent"
